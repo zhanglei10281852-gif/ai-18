@@ -38,10 +38,3 @@ func (j OutboxJob) Clone() OutboxJob {
 	clone.Payload = append([]byte(nil), j.Payload...)
 	return clone
 }
-
-func (j OutboxJob) StopsBatchAfterFailure() bool {
-	if j.Status != JobRunning {
-		return false
-	}
-	return j.Attempts < j.MaxAttempts
-}
