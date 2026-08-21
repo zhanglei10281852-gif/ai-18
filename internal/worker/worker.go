@@ -70,9 +70,9 @@ func (w *Worker) RunOnce(ctx context.Context) error {
 					return fmt.Errorf("retry job %s: %w", job.ID, retryErr)
 				}
 				w.logger.Warn("outbox job failed", "job_id", job.ID, "attempt", job.Attempts, "dead", dead, "error", err)
-				if job.StopsBatchAfterFailure() {
-					return nil
-				}
+				// Isolate the failing message: it backs off per its own attempt
+				// count while the remaining jobs in this batch still run this
+				// tick. Do not abort the whole batch on a single failure.
 				continue
 			}
 			if err := tx.CompleteJob(ctx, job.ID, now); err != nil {
